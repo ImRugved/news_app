@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -11,13 +12,25 @@ import 'package:news_app/View/Provider/news_provider.dart';
 import 'package:news_app/View/Screens/home_screen.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  // Ensure initialized
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  // Keep the splash screen until initialization is done
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
     ),
   );
+
+  // Initialize services and providers here
+
+  // Remove splash screen when initialization is done
+  FlutterNativeSplash.remove();
+
   runApp(const MyApp());
 }
 
@@ -103,7 +116,8 @@ class MyApp extends StatelessWidget {
             ),
             themeMode: ThemeMode.light, // Default to light theme
             getPages: AppRoutes.getPages,
-            initialRoute: AppRoutes.home,
+            initialRoute: '/',
+            defaultTransition: Transition.fadeIn,
           ),
         );
       },

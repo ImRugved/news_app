@@ -15,7 +15,7 @@ class NewsProvider extends ChangeNotifier {
   LoadingStatus _searchStatus = LoadingStatus.initial;
   LoadingStatus _loadMoreStatus = LoadingStatus.initial;
 
-  String _currentNewsSource = 'bbc-news';
+  String _currentNewsSource = 'the-hindu';
   String _currentCategory = 'General';
   String _searchQuery = '';
   String _errorMessage = '';

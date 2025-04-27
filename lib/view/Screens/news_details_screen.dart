@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -6,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:news_app/Constants/app_colors.dart';
 import 'package:news_app/Constants/app_text_styles.dart';
+import 'package:news_app/Utils/url_helper.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,7 +20,9 @@ class NewsDetailsScreen extends StatelessWidget {
   final String newsDesc;
   final String newsContent;
   final String newsSource;
+
   final String heroTag;
+  final String newsUrl;
 
   const NewsDetailsScreen({
     super.key,
@@ -29,6 +34,7 @@ class NewsDetailsScreen extends StatelessWidget {
     required this.newsContent,
     required this.newsSource,
     required this.heroTag,
+    required this.newsUrl,
   });
 
   static NewsDetailsScreen fromArguments(Map<String, dynamic> args) {
@@ -41,6 +47,7 @@ class NewsDetailsScreen extends StatelessWidget {
       newsContent: args['newsContent'] ?? '',
       newsSource: args['newsSource'] ?? '',
       heroTag: args['heroTag'] ?? 'heroTag',
+      newsUrl: args['newsUrl'] ?? '',
     );
   }
 
@@ -102,7 +109,11 @@ class NewsDetailsScreen extends StatelessWidget {
                     Hero(
                       tag: heroTag,
                       child: CachedNetworkImage(
-                        imageUrl: newsImage,
+                        imageUrl: newsImage.isNotEmpty &&
+                                (newsImage.startsWith('http://') ||
+                                    newsImage.startsWith('https://'))
+                            ? newsImage
+                            : 'https://via.placeholder.com/400x300?text=No+Image',
                         fit: BoxFit.cover,
                         errorWidget: (context, url, error) => Container(
                           color: AppColors.lightGrey,
@@ -285,14 +296,36 @@ class NewsDetailsScreen extends StatelessWidget {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () async {
-                          // Use a default URL since we don't have the original article URL
-                          final url = Uri.parse(
-                              'https://news.google.com/search?q=$newsTitle');
-                          if (await canLaunchUrl(url)) {
-                            await launchUrl(
-                              url,
-                              mode: LaunchMode.externalApplication,
-                            );
+                          log('Attempting to open URL: $newsUrl');
+
+                          // Try to open the URL with our helper
+                          final success = await UrlHelper.openUrl(newsUrl);
+
+                          // Show error if URL couldn't be opened
+                          if (!success) {
+                            if (context.mounted) {
+                              UrlHelper.showUrlErrorSnackBar(context,
+                                  'Could not open the article. Please try again later.');
+                            }
+
+                            // Try alternative approaches if the first one fails
+                            if (newsUrl.isNotEmpty) {
+                              log('Trying alternative launch modes...');
+
+                              // Try with in-app browser
+                              final inAppSuccess = await UrlHelper.openUrl(
+                                  newsUrl,
+                                  mode: LaunchMode.inAppWebView);
+
+                              if (inAppSuccess) return;
+
+                              // Try with platform default
+                              final platformSuccess = await UrlHelper.openUrl(
+                                  newsUrl,
+                                  mode: LaunchMode.platformDefault);
+
+                              if (platformSuccess) return;
+                            }
                           }
                         },
                         style: ElevatedButton.styleFrom(

@@ -90,6 +90,7 @@ class HeadlinesCarousel extends StatelessWidget {
                       'newsDesc': article.description ?? '',
                       'newsContent': article.content ?? '',
                       'newsSource': article.source?.name ?? '',
+                      'newsUrl': article.url ?? '',
                       'heroTag': heroTag,
                     },
                   );
@@ -114,7 +115,14 @@ class HeadlinesCarousel extends StatelessWidget {
                         Hero(
                           tag: heroTag,
                           child: CachedNetworkImage(
-                            imageUrl: article.urlToImage ?? '',
+                            imageUrl: (article.urlToImage != null &&
+                                    article.urlToImage!.isNotEmpty &&
+                                    (article.urlToImage!
+                                            .startsWith('http://') ||
+                                        article.urlToImage!
+                                            .startsWith('https://')))
+                                ? article.urlToImage!
+                                : 'https://via.placeholder.com/400x300?text=No+Image',
                             fit: BoxFit.cover,
                             placeholder: (context, url) => _buildImageShimmer(),
                             errorWidget: (context, url, error) => Container(
@@ -235,7 +243,7 @@ class HeadlinesCarousel extends StatelessWidget {
                                             'Read More',
                                             style: AppTextStyles.titleSmall
                                                 .copyWith(
-                                              fontSize: 12.sp,
+                                              fontSize: 14.sp,
                                             ),
                                           ),
                                           SizedBox(width: 4.w),

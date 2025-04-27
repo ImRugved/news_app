@@ -36,12 +36,12 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   String _categoryName = 'General';
 
   final List<CategoryItem> categories = [
-    CategoryItem('General', Icons.public, Colors.blue),
-    CategoryItem('Entertainment', Icons.movie, Colors.purple),
-    CategoryItem('Health', Icons.health_and_safety, Colors.green),
-    CategoryItem('Sports', Icons.sports_basketball, Colors.orange),
-    CategoryItem('Business', Icons.business, Colors.indigo),
-    CategoryItem('Technology', Icons.computer, Colors.red),
+    CategoryItem('General', Icons.public, AppColors.generalColor),
+    CategoryItem('Entertainment', Icons.movie, AppColors.entertainmentColor),
+    CategoryItem('Health', Icons.health_and_safety, AppColors.healthColor),
+    CategoryItem('Sports', Icons.sports_basketball, AppColors.sportsColor),
+    CategoryItem('Business', Icons.business, AppColors.businessColor),
+    CategoryItem('Technology', Icons.computer, AppColors.technologyColor),
   ];
 
   @override
@@ -69,31 +69,33 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildCategorySelector(),
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                physics: const BouncingScrollPhysics(),
-                onPageChanged: (index) {
-                  setState(() {
-                    _categoryName = categories[index].name;
-                  });
-                  Provider.of<NewsProvider>(context, listen: false)
-                      .setCategory(_categoryName);
-                },
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  return _buildCategoryContent();
-                },
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: AppColors.scaffoldBackground,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              _buildCategorySelector(),
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  physics: const BouncingScrollPhysics(),
+                  onPageChanged: (index) {
+                    setState(() {
+                      _categoryName = categories[index].name;
+                    });
+                    Provider.of<NewsProvider>(context, listen: false)
+                        .setCategory(_categoryName);
+                  },
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    return _buildCategoryContent();
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -101,12 +103,12 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        //   color: AppColors.cardBackground,
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor,
+            color: AppColors.shadowColor.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -120,7 +122,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             icon: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: AppColors.lightGrey,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Icon(
@@ -131,7 +133,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           ),
           Text(
             'Discover',
-            style: AppTextStyles.headlineLarge,
+            style: AppTextStyles.headlineLarge.copyWith(
+              color: AppColors.textColor,
+              fontWeight: FontWeight.w600,
+            ),
           )
               .animate()
               .fadeIn(duration: 300.ms)
@@ -139,11 +144,12 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           IconButton(
             onPressed: () {
               // Search functionality
+              Get.toNamed(AppRoutes.search);
             },
             icon: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: AppColors.lightGrey,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Icon(
@@ -159,8 +165,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   Widget _buildCategorySelector() {
     return Container(
-      height: 120.h,
-      padding: EdgeInsets.symmetric(vertical: 16.h),
+      height: 100.h,
+      // padding: EdgeInsets.symmetric(vertical: 8.h),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -190,7 +196,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       },
       child: Container(
         width: 100.w,
-        margin: EdgeInsets.symmetric(horizontal: 8.w),
+        margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -199,12 +205,22 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               height: 60.h,
               width: 60.w,
               decoration: BoxDecoration(
-                color: isSelected ? categories[index].color : Colors.grey[200],
+                gradient: isSelected
+                    ? LinearGradient(
+                        colors: [
+                          categories[index].color,
+                          categories[index].color.withOpacity(0.7),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : null,
+                color: isSelected ? null : AppColors.lightGrey,
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: categories[index].color.withOpacity(0.3),
+                          color: categories[index].color.withOpacity(0.4),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                           spreadRadius: 2,
@@ -214,20 +230,24 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               ),
               child: Icon(
                 categories[index].icon,
-                color: isSelected ? Colors.white : Colors.black54,
+                color: isSelected
+                    ? Colors.white
+                    : categories[index].color.withOpacity(0.7),
                 size: 28,
               ),
             ),
-            SizedBox(height: 4.h),
-            Flexible(
+            SizedBox(height: 8.h),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected
+                    ? categories[index].color
+                    : AppColors.secondaryTextColor,
+              ),
               child: Text(
                 categories[index].name,
-                style: AppTextStyles.bodySmall.copyWith(
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected
-                      ? AppColors.textColor
-                      : AppColors.secondaryTextColor,
-                ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -425,6 +445,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                             'newsDesc': article.description ?? '',
                             'newsContent': article.content ?? '',
                             'newsSource': article.source?.name ?? '',
+                            'newsUrl': article.url ?? '',
                             'heroTag': heroTag,
                           },
                         );
@@ -473,6 +494,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               'newsDesc': article.description ?? '',
               'newsContent': article.content ?? '',
               'newsSource': article.source?.name ?? '',
+              'newsUrl': article.url ?? '',
               'heroTag': heroTag,
             },
           );

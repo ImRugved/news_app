@@ -36,6 +36,7 @@ class NewsItem extends StatelessWidget {
             'newsDesc': article.description ?? '',
             'newsContent': article.content ?? '',
             'newsSource': article.source?.name ?? '',
+            'newsUrl': article.url ?? '',
             'heroTag': heroTag,
           },
         );
@@ -69,7 +70,12 @@ class NewsItem extends StatelessWidget {
               child: Hero(
                 tag: heroTag,
                 child: CachedNetworkImage(
-                  imageUrl: article.urlToImage ?? '',
+                  imageUrl: article.urlToImage != null &&
+                          article.urlToImage!.isNotEmpty &&
+                          (article.urlToImage!.startsWith('http://') ||
+                              article.urlToImage!.startsWith('https://'))
+                      ? article.urlToImage!
+                      : 'https://via.placeholder.com/400x300?text=No+Image',
                   height: 200.h,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -193,7 +199,7 @@ class NewsItem extends StatelessWidget {
                           children: [
                             Text(
                               'Read More',
-                              style: AppTextStyles.bodySmall.copyWith(
+                              style: AppTextStyles.bodyMedium.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
                               ),

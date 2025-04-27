@@ -82,12 +82,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        gradient: LinearGradient(
+          colors: AppColors.primaryGradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(20.r),
+          bottomRight: Radius.circular(20.r),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor.withOpacity(0.05),
-            offset: const Offset(0, 1),
-            blurRadius: 2,
+            color: AppColors.shadowColor.withOpacity(0.15),
+            offset: const Offset(0, 3),
+            blurRadius: 10,
           ),
         ],
       ),
@@ -106,12 +114,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           icon: Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: AppColors.lightGrey,
+              color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: const Icon(
-              Icons.category_outlined,
-              color: AppColors.primary,
+            child: Icon(
+              Icons.interests,
+              color: Colors.white,
             ),
           ),
         ).animate().scale(
@@ -122,8 +130,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Text(
           'News Today',
           style: AppTextStyles.headlineLarge.copyWith(
-            fontSize: 20.sp,
-            color: AppColors.primary,
+            fontSize: 22.sp,
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+            shadows: [
+              Shadow(
+                offset: const Offset(1, 1),
+                blurRadius: 3.0,
+                color: Colors.black.withOpacity(0.3),
+              ),
+            ],
           ),
         )
             .animate()
@@ -134,12 +151,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           icon: Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: AppColors.lightGrey,
+              color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.search,
-              color: AppColors.primary,
+              color: Colors.white,
             ),
           ),
         ).animate().scale(
@@ -159,12 +176,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           icon: Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: AppColors.lightGrey,
+              color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.arrow_back,
-              color: AppColors.primary,
+              color: Colors.white,
             ),
           ),
         ),
@@ -175,40 +192,72 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             focusNode: _searchFocus,
             decoration: InputDecoration(
               hintText: 'Search for news...',
-              hintStyle:
-                  AppTextStyles.bodySmall.copyWith(color: AppColors.darkGrey),
+              hintStyle: AppTextStyles.bodySmall.copyWith(
+                color: Colors.white.withOpacity(0.7),
+              ),
               filled: true,
-              fillColor: AppColors.lightGrey,
+              fillColor: Colors.white.withOpacity(0.2),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 12.h,
+              ),
               suffixIcon: IconButton(
                 onPressed: () {
                   _searchController.clear();
                   setState(() {});
                 },
-                icon: Icon(Icons.clear, color: AppColors.darkGrey),
+                icon: Icon(
+                  Icons.clear,
+                  color: Colors.white.withOpacity(0.7),
+                ),
               ),
+            ),
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.white,
             ),
             onChanged: (value) {
               setState(() {});
+              if (value.isNotEmpty) {
+                _performSearch(value);
+              }
             },
             onFieldSubmitted: _performSearch,
             textInputAction: TextInputAction.search,
           ),
         ),
         SizedBox(width: 8.w),
-        ElevatedButton(
-          onPressed: () => _performSearch(_searchController.text),
-          style: ElevatedButton.styleFrom(
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(12),
-            backgroundColor: AppColors.primary,
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: Icon(Icons.search, color: AppColors.white),
+          child: IconButton(
+            onPressed: () => _performSearch(_searchController.text),
+            icon: Icon(
+              Icons.search,
+              color: AppColors.primary,
+              size: 20.sp,
+            ),
+          ),
         ),
       ],
     );
@@ -250,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ).animate().fadeIn(duration: 300.ms, delay: 400.ms).slideX(
                     begin: -0.3, end: 0, duration: 300.ms, delay: 400.ms),
                 TextButton.icon(
-                  onPressed: () {},
+                  onPressed: () => Get.toNamed(AppRoutes.allHeadlines),
                   icon: const Icon(Icons.arrow_forward, size: 16),
                   label: const Text('See All'),
                   style: TextButton.styleFrom(
@@ -288,16 +337,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ).animate().fadeIn(duration: 300.ms, delay: 500.ms).slideX(
                     begin: -0.3, end: 0, duration: 300.ms, delay: 500.ms),
-                TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.refresh, size: 16),
-                  label: const Text('Refresh'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    textStyle: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                Consumer<NewsProvider>(
+                  builder: (context, newsProvider, child) {
+                    return TextButton.icon(
+                      onPressed: () {
+                        // Show refresh indicator
+                        newsProvider.fetchNewsByCategory();
+                      },
+                      icon: const Icon(Icons.refresh, size: 16),
+                      label: const Text('Refresh'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        textStyle: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  },
                 ).animate().fadeIn(duration: 300.ms, delay: 500.ms).slideX(
                     begin: 0.3, end: 0, duration: 300.ms, delay: 500.ms),
               ],
@@ -306,9 +362,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
 
         // Latest News List
-        const SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          sliver: LatestNewsList(),
+        Consumer<NewsProvider>(
+          builder: (context, newsProvider, child) {
+            return SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              sliver: const LatestNewsList(),
+            );
+          },
         ),
       ],
     );
@@ -395,6 +455,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       'newsDesc': article.description ?? '',
                       'newsContent': article.content ?? '',
                       'newsSource': article.source?.name ?? '',
+                      'newsUrl': article.url ?? '',
                       'heroTag': 'search_${article.title}_$index',
                     },
                   );

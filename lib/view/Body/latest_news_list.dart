@@ -154,6 +154,7 @@ class _LatestNewsListState extends State<LatestNewsList> {
                           'newsDesc': article.description ?? '',
                           'newsContent': article.content ?? '',
                           'newsSource': article.source?.name ?? '',
+                          'newsUrl': article.url ?? '',
                           'heroTag': heroTag,
                         },
                       );
@@ -174,7 +175,14 @@ class _LatestNewsListState extends State<LatestNewsList> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12.r),
                                 child: CachedNetworkImage(
-                                  imageUrl: article.urlToImage ?? '',
+                                  imageUrl: (article.urlToImage != null &&
+                                          article.urlToImage!.isNotEmpty &&
+                                          (article.urlToImage!
+                                                  .startsWith('http://') ||
+                                              article.urlToImage!
+                                                  .startsWith('https://')))
+                                      ? article.urlToImage!
+                                      : 'https://via.placeholder.com/90x90?text=No+Image',
                                   fit: BoxFit.cover,
                                   height: 90.h,
                                   width: 90.w,
