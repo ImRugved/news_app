@@ -9,6 +9,7 @@ import 'package:shimmer/shimmer.dart';
 
 import 'package:news_app/Constants/app_colors.dart';
 import 'package:news_app/Constants/app_text_styles.dart';
+import 'package:news_app/Constants/app_theme_colors.dart';
 import 'package:news_app/Models/news_model.dart';
 import 'package:news_app/Utils/routes.dart';
 import 'package:news_app/View/Provider/news_provider.dart';
@@ -93,7 +94,7 @@ class _LatestNewsListState extends State<LatestNewsList> {
                   Text(
                     'Error loading latest news',
                     style: AppTextStyles.bodyMedium
-                        .copyWith(color: AppColors.textColor),
+                        .copyWith(color: AppThemeColors.textColor(context)),
                   ),
                   SizedBox(height: 8.h),
                   ElevatedButton(
@@ -114,7 +115,7 @@ class _LatestNewsListState extends State<LatestNewsList> {
               child: Text(
                 'No news available',
                 style: AppTextStyles.bodyMedium
-                    .copyWith(color: AppColors.textColor),
+                    .copyWith(color: AppThemeColors.textColor(context)),
               ),
             ),
           );
@@ -161,7 +162,7 @@ class _LatestNewsListState extends State<LatestNewsList> {
                     },
                     child: Card(
                       elevation: 2,
-                      shadowColor: AppColors.shadowColor.withOpacity(0.2),
+                      shadowColor: AppThemeColors.shadowColor(context),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16.r),
                       ),
@@ -182,7 +183,7 @@ class _LatestNewsListState extends State<LatestNewsList> {
                                               article.urlToImage!
                                                   .startsWith('https://')))
                                       ? article.urlToImage!
-                                      : 'https://via.placeholder.com/90x90?text=No+Image',
+                                      : 'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg',
                                   fit: BoxFit.cover,
                                   height: 90.h,
                                   width: 90.w,
@@ -192,69 +193,68 @@ class _LatestNewsListState extends State<LatestNewsList> {
                                       Container(
                                     height: 90.h,
                                     width: 90.w,
-                                    color: AppColors.grey,
+                                    color: AppThemeColors.grey(context),
                                     child: Icon(Icons.broken_image,
-                                        color: AppColors.white),
+                                        color:
+                                            AppThemeColors.textColor(context)),
                                   ),
                                 ),
                               ),
                             ),
-                            SizedBox(width: 12.w),
+                            SizedBox(width: 16.w),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // News title
+                                  // Title
                                   Text(
                                     article.title ?? '',
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppThemeColors.textColor(context),
+                                    ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style:
-                                        AppTextStyles.headlineMedium.copyWith(
-                                      color: AppColors.textColor,
-                                      height: 1.3,
-                                    ),
                                   ),
                                   SizedBox(height: 8.h),
+
+                                  // Description (if available)
                                   if (article.description != null &&
                                       article.description!.isNotEmpty)
                                     Text(
                                       article.description!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                       style: AppTextStyles.bodySmall.copyWith(
-                                        color: AppColors.darkGrey,
+                                        color:
+                                            AppThemeColors.secondaryTextColor(
+                                                context),
                                       ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   SizedBox(height: 8.h),
+
                                   // Source and date
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Flexible(
-                                        child: _buildSourceBadge(
-                                            article.source?.name ?? ''),
+                                      Expanded(
+                                        child: Text(
+                                          article.source?.name ?? '',
+                                          style:
+                                              AppTextStyles.bodySmall.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.primary,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                      Flexible(
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Icon(
-                                              Icons.calendar_today_rounded,
-                                              size: 12,
-                                              color: AppColors.darkGrey,
-                                            ),
-                                            SizedBox(width: 4.w),
-                                            Text(
-                                              format.format(dateTime),
-                                              style: AppTextStyles.headlineSmall
-                                                  .copyWith(
-                                                color: AppColors.darkGrey,
-                                                fontSize: 10.sp,
-                                              ),
-                                            ),
-                                          ],
+                                      Text(
+                                        format.format(dateTime),
+                                        style: AppTextStyles.bodySmall.copyWith(
+                                          color:
+                                              AppThemeColors.darkGrey(context),
                                         ),
                                       ),
                                     ],
@@ -266,38 +266,36 @@ class _LatestNewsListState extends State<LatestNewsList> {
                         ),
                       ),
                     ),
-                  )
-                      .animate(delay: Duration(milliseconds: index * 80))
-                      .fadeIn(duration: 300.ms, curve: Curves.easeOutCubic)
-                      .slideX(
-                          begin: index.isEven ? -0.1 : 0.1,
-                          end: 0,
-                          duration: 300.ms,
-                          curve: Curves.easeOutCubic),
+                  ).animate().fadeIn(
+                        duration: 300.ms,
+                        delay: Duration(milliseconds: index * 50),
+                      ),
                 );
               },
             ),
 
-            // Loading indicator at the bottom
-            if (_isLoadingMore ||
-                newsProvider.loadMoreStatus == LoadingStatus.loading)
+            // Loading indicator for pagination
+            if (_isLoadingMore && newsProvider.hasMoreData)
               Padding(
-                padding: EdgeInsets.only(top: 8.h, bottom: 20.h),
-                child: _buildLatestNewsShimmer(),
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.primary,
+                    ),
+                  ),
+                ),
               ),
 
-            // End of list message when no more data
-            if (!newsProvider.hasMoreData &&
-                !_isLoadingMore &&
-                newsProvider.loadMoreStatus != LoadingStatus.loading &&
-                articles.isNotEmpty)
+            // "No more news" indicator
+            if (!newsProvider.hasMoreData && articles.isNotEmpty)
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 20.h),
+                padding: EdgeInsets.symmetric(vertical: 16.h),
                 child: Center(
                   child: Text(
                     'No more news to load',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.darkGrey,
+                      color: AppThemeColors.darkGrey(context),
                     ),
                   ),
                 ),
@@ -308,97 +306,43 @@ class _LatestNewsListState extends State<LatestNewsList> {
     );
   }
 
-  Widget _buildSourceBadge(String sourceName) {
-    if (sourceName.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Text(
-        sourceName,
-        style: AppTextStyles.headlineSmall.copyWith(
-          color: AppColors.primary,
-          fontSize: 10.sp,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
   Widget _buildLatestNewsShimmer() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
       child: Card(
         elevation: 2,
-        shadowColor: AppColors.shadowColor.withOpacity(0.2),
+        shadowColor: AppThemeColors.shadowColor(context),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),
-        child: Shimmer.fromColors(
-          baseColor: AppColors.shimmerBaseColor,
-          highlightColor: AppColors.shimmerHighlightColor,
-          child: Padding(
-            padding: EdgeInsets.all(12.w),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 90.h,
-                  width: 90.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
+        child: Padding(
+          padding: EdgeInsets.all(12.w),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSmallImageShimmer(),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildShimmerLine(width: double.infinity, height: 16.h),
+                    SizedBox(height: 8.h),
+                    _buildShimmerLine(width: double.infinity, height: 16.h),
+                    SizedBox(height: 8.h),
+                    _buildShimmerLine(width: 200.w, height: 16.h),
+                    SizedBox(height: 8.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildShimmerLine(width: 100.w, height: 12.h),
+                        _buildShimmerLine(width: 80.w, height: 12.h),
+                      ],
+                    ),
+                  ],
                 ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 12.h,
-                        color: Colors.white,
-                        width: double.infinity,
-                      ),
-                      SizedBox(height: 6.h),
-                      Container(
-                        height: 12.h,
-                        color: Colors.white,
-                        width: 0.7.sw,
-                      ),
-                      SizedBox(height: 10.h),
-                      Container(
-                        height: 10.h,
-                        color: Colors.white,
-                        width: 0.5.sw,
-                      ),
-                      SizedBox(height: 16.h),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            height: 16.h,
-                            width: 60.w,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                          ),
-                          Container(
-                            height: 10.h,
-                            width: 80.w,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -406,13 +350,37 @@ class _LatestNewsListState extends State<LatestNewsList> {
   }
 
   Widget _buildSmallImageShimmer() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
+      baseColor: isDarkMode ? Colors.grey[800]! : AppColors.shimmerBaseColor,
+      highlightColor:
+          isDarkMode ? Colors.grey[700]! : AppColors.shimmerHighlightColor,
       child: Container(
         height: 90.h,
         width: 90.w,
-        color: Colors.white,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerLine({required double width, required double height}) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Shimmer.fromColors(
+      baseColor: isDarkMode ? Colors.grey[800]! : AppColors.shimmerBaseColor,
+      highlightColor:
+          isDarkMode ? Colors.grey[700]! : AppColors.shimmerHighlightColor,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4.r),
+        ),
       ),
     );
   }

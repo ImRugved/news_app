@@ -75,7 +75,7 @@ class NewsItem extends StatelessWidget {
                           (article.urlToImage!.startsWith('http://') ||
                               article.urlToImage!.startsWith('https://'))
                       ? article.urlToImage!
-                      : 'https://via.placeholder.com/400x300?text=No+Image',
+                      : 'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg',
                   height: 200.h,
                   width: double.infinity,
                   fit: BoxFit.cover,

@@ -2,7 +2,7 @@ class Global {
   // API settings
   static const String hostUrl = 'https://newsapi.org/v2';
   static const String apiKey =
-      'b53455bd3edf41f19769aaf32d4cdd1d'; // Your API key
+      '4299caf3c54049fea5020ea1cc0e0753'; // Your API key
 
   // App settings
   static const String defaultLanguage = 'en';

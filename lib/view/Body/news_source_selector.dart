@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:news_app/Constants/app_colors.dart';
 import 'package:news_app/Constants/app_text_styles.dart';
+import 'package:news_app/Constants/app_theme_colors.dart';
 
 class NewsSourceSelector extends StatelessWidget {
   final List<Map<String, dynamic>> newsSources;
@@ -44,7 +45,7 @@ class NewsSourceSelector extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.primary
-                            : AppColors.lightGrey,
+                            : AppThemeColors.lightGrey(context),
                         borderRadius: BorderRadius.circular(20.r),
                         boxShadow: isSelected
                             ? [
@@ -74,11 +75,11 @@ class NewsSourceSelector extends StatelessWidget {
                       source['name'],
                       style: isSelected
                           ? AppTextStyles.headlineSmall.copyWith(
-                              color: AppColors.textColor,
+                              color: AppThemeColors.textColor(context),
                               fontWeight: FontWeight.w600,
                             )
                           : AppTextStyles.headlineSmall.copyWith(
-                              color: AppColors.darkGrey,
+                              color: AppThemeColors.darkGrey(context),
                               fontWeight: FontWeight.w500,
                             ),
                       textAlign: TextAlign.center,

@@ -6,8 +6,10 @@ import 'package:provider/provider.dart';
 
 import 'package:news_app/Constants/app_colors.dart';
 import 'package:news_app/Constants/app_text_styles.dart';
+import 'package:news_app/Constants/app_theme_colors.dart';
 import 'package:news_app/Utils/routes.dart';
 import 'package:news_app/View/Provider/news_provider.dart';
+import 'package:news_app/View/Widgets/theme_toggle.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -42,7 +44,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppThemeColors.backgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -61,7 +63,7 @@ class _SearchScreenState extends State<SearchScreen> {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: AppColors.secondaryGradient,
+          colors: AppThemeColors.primaryGradient(context),
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -71,7 +73,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor.withOpacity(0.15),
+            color: AppThemeColors.shadowColor(context),
             offset: const Offset(0, 3),
             blurRadius: 10,
           ),
@@ -146,6 +148,8 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           SizedBox(width: 8.w),
+          ThemeToggle(),
+          SizedBox(width: 8.w),
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -175,6 +179,37 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildSearchResults() {
     return Consumer<NewsProvider>(
       builder: (context, newsProvider, child) {
+        if (_searchController.text.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search,
+                  size: 64,
+                  color: AppThemeColors.darkGrey(context),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'Search for your favorite news',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppThemeColors.textColor(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  'Find the latest articles from around the world',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppThemeColors.secondaryTextColor(context),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
         if (newsProvider.searchStatus == LoadingStatus.loading) {
           return Center(
             child: CircularProgressIndicator(
@@ -193,23 +228,13 @@ class _SearchScreenState extends State<SearchScreen> {
                 Text(
                   'Error searching news',
                   style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppThemeColors.textColor(context),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 SizedBox(height: 8.h),
                 ElevatedButton(
                   onPressed: () => _performSearch(_searchController.text),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 8.h,
-                    ),
-                  ),
                   child: const Text('Retry'),
                 ),
               ],
@@ -227,21 +252,20 @@ class _SearchScreenState extends State<SearchScreen> {
                 Icon(
                   Icons.search_off,
                   size: 64,
-                  color: AppColors.secondary.withOpacity(0.5),
+                  color: AppThemeColors.darkGrey(context),
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  'No results found',
-                  style: AppTextStyles.headlineMedium.copyWith(
-                    color: AppColors.textColor,
-                    fontWeight: FontWeight.bold,
+                  'No results found for "${_searchController.text}"',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppThemeColors.textColor(context),
                   ),
                 ),
                 SizedBox(height: 8.h),
                 Text(
                   'Try different keywords or check your spelling',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.secondaryTextColor,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppThemeColors.secondaryTextColor(context),
                   ),
                 ),
               ],
@@ -256,11 +280,11 @@ class _SearchScreenState extends State<SearchScreen> {
             final article = articles[index];
             return Card(
               margin: EdgeInsets.only(bottom: 16.h),
+              elevation: 2,
+              shadowColor: AppThemeColors.shadowColor(context),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              elevation: 3,
-              shadowColor: AppColors.shadowColor.withOpacity(0.3),
               child: InkWell(
                 onTap: () {
                   Get.toNamed(
@@ -278,148 +302,96 @@ class _SearchScreenState extends State<SearchScreen> {
                     },
                   );
                 },
-                borderRadius: BorderRadius.circular(16.r),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border(
-                      left: BorderSide(
-                        color: _getColorForIndex(index),
-                        width: 4.w,
-                      ),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(12.w),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12.r),
-                          child: Image.network(
-                            article.urlToImage ?? '',
-                            width: 100.w,
-                            height: 100.h,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: 100.w,
-                                height: 100.h,
-                                color: AppColors.grey,
-                                child: Icon(
-                                  Icons.broken_image,
-                                  color: AppColors.white,
-                                ),
-                              );
-                            },
-                          ),
+                borderRadius: BorderRadius.circular(12.r),
+                child: Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8.r),
+                        child: Image.network(
+                          article.urlToImage ??
+                              'https://via.placeholder.com/100',
+                          width: 100.w,
+                          height: 100.h,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 100.w,
+                              height: 100.h,
+                              color: AppThemeColors.grey(context),
+                              child: Icon(
+                                Icons.broken_image,
+                                color: AppThemeColors.textColor(context),
+                              ),
+                            );
+                          },
                         ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                article.title ?? '',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textColor,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              article.title ?? '',
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppThemeColors.textColor(context),
+                                fontSize: 16.sp,
                               ),
-                              SizedBox(height: 8.h),
-                              Text(
-                                article.description ?? '',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.secondaryTextColor,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              article.description ?? '',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color:
+                                    AppThemeColors.secondaryTextColor(context),
                               ),
-                              SizedBox(height: 8.h),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8.w,
-                                      vertical: 4.h,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: 8.h),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    article.source?.name ?? '',
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    decoration: BoxDecoration(
-                                      color: _getColorForIndex(index)
-                                          .withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8.r),
-                                    ),
-                                    child: Text(
-                                      article.source?.name ?? '',
-                                      style:
-                                          AppTextStyles.headlineSmall.copyWith(
-                                        color: _getColorForIndex(index),
-                                        fontSize: 10.sp,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (article.publishedAt != null)
+                                  Text(
+                                    article.publishedAt!.substring(0, 10),
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppThemeColors.darkGrey(context),
                                     ),
                                   ),
-                                  if (article.publishedAt != null)
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.access_time_rounded,
-                                          size: 12.sp,
-                                          color: AppColors.secondaryTextColor,
-                                        ),
-                                        SizedBox(width: 4.w),
-                                        Text(
-                                          _formatDate(article.publishedAt!),
-                                          style: AppTextStyles.headlineSmall
-                                              .copyWith(
-                                            color: AppColors.secondaryTextColor,
-                                            fontSize: 10.sp,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ).animate().fadeIn(
-                duration: 300.ms, delay: Duration(milliseconds: index * 100));
+                  duration: 300.ms,
+                  delay: Duration(milliseconds: index * 100),
+                );
           },
         );
       },
     );
-  }
-
-  Color _getColorForIndex(int index) {
-    switch (index % 4) {
-      case 0:
-        return AppColors.cardAccent1;
-      case 1:
-        return AppColors.cardAccent2;
-      case 2:
-        return AppColors.cardAccent3;
-      case 3:
-        return AppColors.cardAccent4;
-      default:
-        return AppColors.secondary;
-    }
-  }
-
-  String _formatDate(String dateString) {
-    try {
-      final date = DateTime.parse(dateString);
-      return '${date.day}/${date.month}/${date.year}';
-    } catch (e) {
-      return dateString;
-    }
   }
 }

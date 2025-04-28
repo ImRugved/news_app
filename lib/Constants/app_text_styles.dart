@@ -3,51 +3,56 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-TextTheme getTextTheme() {
+TextTheme getTextTheme({bool isDark = false}) {
+  Color textColor = isDark ? Colors.white : AppColors.textColor;
+  Color primaryColor = AppColors.primary;
+  Color whiteColor = isDark ? Colors.white : AppColors.white;
+  Color darkGreyColor = isDark ? Colors.white70 : AppColors.darkGrey;
+
   return TextTheme(
     headlineLarge: GoogleFonts.poppins(
       fontWeight: FontWeight.w600,
-      color: AppColors.textColor,
+      color: textColor,
       fontSize: 16.sp,
     ),
     headlineMedium: GoogleFonts.poppins(
       fontWeight: FontWeight.w500,
-      color: AppColors.textColor,
+      color: textColor,
       fontSize: 14.sp,
     ),
     headlineSmall: GoogleFonts.poppins(
       fontWeight: FontWeight.w400,
-      color: AppColors.textColor,
+      color: textColor,
       fontSize: 12.sp,
     ),
     bodyLarge: GoogleFonts.poppins(
       fontWeight: FontWeight.w500,
-      color: AppColors.primary,
+      color: primaryColor,
       fontSize: 18.sp,
     ),
     bodyMedium: GoogleFonts.poppins(
       fontWeight: FontWeight.w500,
-      color: AppColors.primary,
+      color: primaryColor,
       fontSize: 14.sp,
     ),
     bodySmall: GoogleFonts.poppins(
       fontWeight: FontWeight.w500,
-      color: AppColors.primary,
+      color: primaryColor,
       fontSize: 12.sp,
     ),
     titleLarge: GoogleFonts.poppins(
       fontWeight: FontWeight.w600,
-      color: AppColors.white,
+      color: whiteColor,
       fontSize: 18.sp,
     ),
     titleMedium: GoogleFonts.poppins(
       fontWeight: FontWeight.w500,
-      color: AppColors.white,
+      color: whiteColor,
       fontSize: 16.sp,
     ),
     titleSmall: GoogleFonts.poppins(
       fontWeight: FontWeight.w500,
-      color: AppColors.white,
+      color: whiteColor,
       fontSize: 14.sp,
     ),
     displayLarge: GoogleFonts.poppins(

@@ -5,14 +5,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'package:news_app/Constants/app_colors.dart';
 import 'package:news_app/Constants/app_constants.dart';
 import 'package:news_app/Constants/app_text_styles.dart';
+import 'package:news_app/Constants/app_theme_colors.dart';
 import 'package:news_app/Models/news_model.dart';
 import 'package:news_app/Utils/routes.dart';
 import 'package:news_app/View/Provider/news_provider.dart';
 import 'package:news_app/View/Screens/news_details_screen.dart';
+import 'package:news_app/View/Widgets/theme_toggle.dart';
 
 class CategoryItem {
   final String name;
@@ -69,33 +72,31 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.scaffoldBackground,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildCategorySelector(),
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  physics: const BouncingScrollPhysics(),
-                  onPageChanged: (index) {
-                    setState(() {
-                      _categoryName = categories[index].name;
-                    });
-                    Provider.of<NewsProvider>(context, listen: false)
-                        .setCategory(_categoryName);
-                  },
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    return _buildCategoryContent();
-                  },
-                ),
+    return Scaffold(
+      backgroundColor: AppThemeColors.scaffoldBackground(context),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
+            _buildCategorySelector(),
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                physics: const BouncingScrollPhysics(),
+                onPageChanged: (index) {
+                  setState(() {
+                    _categoryName = categories[index].name;
+                  });
+                  Provider.of<NewsProvider>(context, listen: false)
+                      .setCategory(_categoryName);
+                },
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  return _buildCategoryContent();
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -108,7 +109,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         //   color: AppColors.cardBackground,
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor.withOpacity(0.1),
+            color: AppThemeColors.shadowColor(context),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -122,41 +123,47 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             icon: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: AppColors.lightGrey,
+                color: AppThemeColors.lightGrey(context),
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Icon(
                 Icons.arrow_back,
-                color: AppColors.textColor,
+                color: AppThemeColors.textColor(context),
               ),
             ),
           ),
           Text(
             'Discover',
             style: AppTextStyles.headlineLarge.copyWith(
-              color: AppColors.textColor,
+              color: AppThemeColors.textColor(context),
               fontWeight: FontWeight.w600,
             ),
           )
               .animate()
               .fadeIn(duration: 300.ms)
               .slideY(begin: 0.3, end: 0, duration: 300.ms),
-          IconButton(
-            onPressed: () {
-              // Search functionality
-              Get.toNamed(AppRoutes.search);
-            },
-            icon: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: AppColors.lightGrey,
-                borderRadius: BorderRadius.circular(12.r),
+          Row(
+            children: [
+              ThemeToggle(useContrastBackground: true),
+              SizedBox(width: 8.w),
+              IconButton(
+                onPressed: () {
+                  // Search functionality
+                  Get.toNamed(AppRoutes.search);
+                },
+                icon: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: AppThemeColors.lightGrey(context),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Icon(
+                    Icons.search,
+                    color: AppThemeColors.textColor(context),
+                  ),
+                ),
               ),
-              child: Icon(
-                Icons.search,
-                color: AppColors.textColor,
-              ),
-            ),
+            ],
           ),
         ],
       ),
@@ -270,9 +277,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     return Consumer<NewsProvider>(
       builder: (context, newsProvider, child) {
         if (newsProvider.categoryNewsStatus == LoadingStatus.loading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return _buildShimmerLoading();
         }
 
         if (newsProvider.categoryNewsStatus == LoadingStatus.error) {
@@ -337,7 +342,194 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     );
   }
 
-  // Featured news card for highlighted articles
+  Widget _buildShimmerLoading() {
+    return Padding(
+      padding: EdgeInsets.all(16.w),
+      child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        itemCount: 8,
+        itemBuilder: (context, index) {
+          // Alternate between featured and standard shimmer cards
+          return index % 3 == 0
+              ? _buildFeaturedShimmerCard()
+              : _buildStandardShimmerCard();
+        },
+      ),
+    );
+  }
+
+  Widget _buildFeaturedShimmerCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      margin: EdgeInsets.only(bottom: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image placeholder
+          _buildShimmerContainer(
+            height: 200.h,
+            width: double.infinity,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16.r),
+              topRight: Radius.circular(16.r),
+            ),
+          ),
+
+          // Content placeholders
+          Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _buildShimmerContainer(
+                      width: 80.w,
+                      height: 20.h,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    const Spacer(),
+                    _buildShimmerContainer(
+                      width: 100.w,
+                      height: 12.h,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                _buildShimmerContainer(
+                  width: double.infinity,
+                  height: 24.h,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                SizedBox(height: 8.h),
+                _buildShimmerContainer(
+                  width: double.infinity,
+                  height: 16.h,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                SizedBox(height: 6.h),
+                _buildShimmerContainer(
+                  width: double.infinity,
+                  height: 16.h,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                SizedBox(height: 16.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildShimmerContainer(
+                        height: 14.h,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    _buildShimmerContainer(
+                      width: 100.w,
+                      height: 36.h,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStandardShimmerCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      margin: EdgeInsets.only(bottom: 12.h),
+      child: Padding(
+        padding: EdgeInsets.all(12.w),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Thumbnail placeholder
+            _buildShimmerContainer(
+              width: 100.w,
+              height: 100.h,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            SizedBox(width: 12.w),
+
+            // Content placeholders
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildShimmerContainer(
+                        width: 60.w,
+                        height: 16.h,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      _buildShimmerContainer(
+                        width: 40.w,
+                        height: 12.h,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  _buildShimmerContainer(
+                    width: double.infinity,
+                    height: 18.h,
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildShimmerContainer(
+                    width: double.infinity,
+                    height: 18.h,
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildShimmerContainer(
+                    width: 120.w,
+                    height: 12.h,
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerContainer({
+    required double height,
+    double? width,
+    BorderRadius? borderRadius,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Shimmer.fromColors(
+      baseColor: AppThemeColors.shimmerBaseColor(context),
+      highlightColor: AppThemeColors.shimmerHighlightColor(context),
+      child: Container(
+        height: height,
+        width: width,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: borderRadius ?? BorderRadius.circular(4.r),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFeaturedNewsCard(
       Article article, DateTime dateTime, String category, String heroTag) {
     Color categoryColor = _getCategoryColor(category);
@@ -411,14 +603,22 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 SizedBox(height: 8.h),
                 Text(
                   article.title ?? '',
-                  style: AppTextStyles.headlineLarge,
+                  style: AppTextStyles.headlineLarge.copyWith(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : AppThemeColors.textColor(context),
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 8.h),
                 Text(
                   article.description ?? '',
-                  style: AppTextStyles.bodyMedium,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white70
+                        : AppThemeColors.secondaryTextColor(context),
+                  ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -472,12 +672,11 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         .slideY(begin: 0.2, end: 0, duration: 300.ms);
   }
 
-  // Standard news card for regular articles
   Widget _buildStandardNewsCard(
       Article article, DateTime dateTime, String category, String heroTag) {
     return Card(
       elevation: 2,
-      shadowColor: AppColors.shadowColor,
+      shadowColor: AppThemeColors.shadowColor(context),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.r),
       ),
@@ -518,9 +717,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                     errorBuilder: (context, error, stackTrace) => Container(
                       width: 100.w,
                       height: 100.h,
-                      color: Colors.grey[300],
-                      child:
-                          Icon(Icons.image_not_supported, color: Colors.grey),
+                      color: AppThemeColors.grey(context),
+                      child: Icon(Icons.image_not_supported,
+                          color: AppThemeColors.textColor(context)),
                     ),
                   ),
                 ),
@@ -553,7 +752,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         Text(
                           DateFormat('MMM dd').format(dateTime),
                           style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.lightTextColor,
+                            color: AppThemeColors.lightTextColor(context),
                             fontSize: 10.sp,
                           ),
                         ),
@@ -564,6 +763,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       article.title ?? '',
                       style: AppTextStyles.bodyLarge.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : AppThemeColors.textColor(context),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -571,8 +773,12 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                     SizedBox(height: 6.h),
                     Text(
                       article.description ?? '',
-                      style: AppTextStyles.bodySmall,
-                      maxLines: 2,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white70
+                            : AppThemeColors.secondaryTextColor(context),
+                      ),
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 6.h),

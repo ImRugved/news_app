@@ -7,11 +7,13 @@ import 'package:provider/provider.dart';
 
 import 'package:news_app/Constants/app_colors.dart';
 import 'package:news_app/Constants/app_text_styles.dart';
+import 'package:news_app/Constants/app_theme_colors.dart';
 import 'package:news_app/Utils/routes.dart';
 import 'package:news_app/View/Body/headlines_carousel.dart';
 import 'package:news_app/View/Body/latest_news_list.dart';
 import 'package:news_app/View/Body/news_source_selector.dart';
 import 'package:news_app/View/Provider/news_provider.dart';
+import 'package:news_app/View/Widgets/theme_toggle.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,10 +63,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-      body: SafeArea(
-        child: Column(
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: AppThemeColors.backgroundColor(context),
+        body: Column(
           children: [
             _buildAppBar(),
             Expanded(
@@ -83,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: AppColors.primaryGradient,
+          colors: AppThemeColors.primaryGradient(context),
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -93,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor.withOpacity(0.15),
+            color: AppThemeColors.shadowColor(context),
             offset: const Offset(0, 3),
             blurRadius: 10,
           ),
@@ -146,24 +148,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             .animate()
             .fadeIn(duration: 300.ms, delay: 200.ms)
             .slideY(begin: 0.3, end: 0, duration: 300.ms, delay: 200.ms),
-        IconButton(
-          onPressed: _toggleSearch,
-          icon: Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Icon(
-              Icons.search,
-              color: Colors.white,
-            ),
-          ),
-        ).animate().scale(
-            begin: const Offset(0.5, 0.5),
-            end: const Offset(1, 1),
-            duration: 300.ms,
-            delay: 100.ms),
+        Row(
+          children: [
+            ThemeToggle(),
+            SizedBox(width: 8.w),
+            IconButton(
+              onPressed: _toggleSearch,
+              icon: Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Icon(
+                  Icons.search,
+                  color: Colors.white,
+                ),
+              ),
+            ).animate().scale(
+                begin: const Offset(0.5, 0.5),
+                end: const Offset(1, 1),
+                duration: 300.ms,
+                delay: 100.ms),
+          ],
+        ),
       ],
     );
   }
@@ -287,14 +295,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         // Headlines Section
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+            padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Headlines',
                   style: AppTextStyles.headlineLarge.copyWith(
-                    color: AppColors.textColor,
+                    color: AppThemeColors.textColor(context),
                   ),
                 ).animate().fadeIn(duration: 300.ms, delay: 400.ms).slideX(
                     begin: -0.3, end: 0, duration: 300.ms, delay: 400.ms),
@@ -326,14 +334,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         // Latest News Section Title
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+            padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 0.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Latest News',
                   style: AppTextStyles.headlineLarge.copyWith(
-                    color: AppColors.textColor,
+                    color: AppThemeColors.textColor(context),
                   ),
                 ).animate().fadeIn(duration: 300.ms, delay: 500.ms).slideX(
                     begin: -0.3, end: 0, duration: 300.ms, delay: 500.ms),
@@ -392,7 +400,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 SizedBox(height: 16.h),
                 Text(
                   'Error searching news',
-                  style: AppTextStyles.bodyMedium,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppThemeColors.textColor(context),
+                  ),
                 ),
                 SizedBox(height: 8.h),
                 ElevatedButton(
@@ -414,19 +424,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Icon(
                   Icons.search_off,
                   size: 64,
-                  color: Colors.grey,
+                  color: AppThemeColors.darkGrey(context),
                 ),
                 SizedBox(height: 16.h),
                 Text(
                   'No results found for "${_searchController.text}"',
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.textColor),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppThemeColors.textColor(context),
+                  ),
                 ),
                 SizedBox(height: 8.h),
                 Text(
                   'Try different keywords or check your spelling',
-                  style: AppTextStyles.bodySmall
-                      .copyWith(color: AppColors.darkGrey),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppThemeColors.darkGrey(context),
+                  ),
                 ),
               ],
             ),
@@ -477,9 +489,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             return Container(
                               width: 100.w,
                               height: 100.h,
-                              color: AppColors.grey,
+                              color: AppThemeColors.grey(context),
                               child: Icon(Icons.broken_image,
-                                  color: AppColors.white),
+                                  color: AppThemeColors.textColor(context)),
                             );
                           },
                         ),
@@ -493,7 +505,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               article.title ?? '',
                               style: AppTextStyles.bodyMedium.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.textColor,
+                                color: AppThemeColors.textColor(context),
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -502,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Text(
                               article.description ?? '',
                               style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.darkGrey,
+                                color: AppThemeColors.darkGrey(context),
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -523,7 +535,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       DateTime.parse(article.publishedAt!),
                                     ),
                                     style: AppTextStyles.headlineSmall.copyWith(
-                                      color: AppColors.darkGrey,
+                                      color: AppThemeColors.darkGrey(context),
                                     ),
                                   ),
                               ],

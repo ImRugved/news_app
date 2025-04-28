@@ -9,6 +9,7 @@ import 'package:shimmer/shimmer.dart';
 
 import 'package:news_app/Constants/app_colors.dart';
 import 'package:news_app/Constants/app_text_styles.dart';
+import 'package:news_app/Constants/app_theme_colors.dart';
 import 'package:news_app/Models/news_model.dart';
 import 'package:news_app/Utils/routes.dart';
 import 'package:news_app/View/Provider/news_provider.dart';
@@ -23,7 +24,7 @@ class HeadlinesCarousel extends StatelessWidget {
     return Consumer<NewsProvider>(
       builder: (context, newsProvider, child) {
         if (newsProvider.headlinesStatus == LoadingStatus.loading) {
-          return _buildHeadlinesShimmer();
+          return _buildHeadlinesShimmer(context);
         }
 
         if (newsProvider.headlinesStatus == LoadingStatus.error) {
@@ -36,7 +37,7 @@ class HeadlinesCarousel extends StatelessWidget {
                 Text(
                   'Error loading headlines',
                   style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.textColor),
+                      .copyWith(color: AppThemeColors.textColor(context)),
                 ),
                 SizedBox(height: 8.h),
                 ElevatedButton(
@@ -54,8 +55,8 @@ class HeadlinesCarousel extends StatelessWidget {
           return Center(
             child: Text(
               'No headlines available',
-              style:
-                  AppTextStyles.bodyMedium.copyWith(color: AppColors.textColor),
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: AppThemeColors.textColor(context)),
             ),
           );
         }
@@ -100,7 +101,7 @@ class HeadlinesCarousel extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20.r),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.shadowColor.withOpacity(0.3),
+                        color: AppThemeColors.shadowColor(context),
                         blurRadius: 15,
                         offset: const Offset(0, 8),
                       ),
@@ -122,14 +123,15 @@ class HeadlinesCarousel extends StatelessWidget {
                                         article.urlToImage!
                                             .startsWith('https://')))
                                 ? article.urlToImage!
-                                : 'https://via.placeholder.com/400x300?text=No+Image',
+                                : 'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg',
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => _buildImageShimmer(),
+                            placeholder: (context, url) =>
+                                _buildImageShimmer(context),
                             errorWidget: (context, url, error) => Container(
-                              color: AppColors.grey,
-                              child: const Icon(
+                              color: AppThemeColors.grey(context),
+                              child: Icon(
                                 Icons.broken_image,
-                                color: AppColors.white,
+                                color: AppThemeColors.textColor(context),
                                 size: 50,
                               ),
                             ),
@@ -198,61 +200,44 @@ class HeadlinesCarousel extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 )
                                     .animate()
-                                    .fadeIn(duration: 300.ms, delay: 200.ms)
-                                    .slideY(begin: 0.2, end: 0),
+                                    .fadeIn(duration: 300.ms, delay: 100.ms)
+                                    .slideY(
+                                        begin: 0.2,
+                                        end: 0,
+                                        duration: 300.ms,
+                                        delay: 100.ms),
 
                                 SizedBox(height: 12.h),
 
-                                // Date and read more button
+                                // Date and Read More button
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.calendar_today_rounded,
-                                          size: 14,
-                                          color: AppColors.white,
-                                        ),
-                                        SizedBox(width: 6.w),
-                                        Text(
-                                          format.format(dateTime),
-                                          style:
-                                              AppTextStyles.titleSmall.copyWith(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.normal,
-                                          ),
-                                        ),
-                                      ],
+                                    Icon(Icons.calendar_today_rounded,
+                                        size: 14, color: Colors.white70),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      format.format(dateTime),
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: Colors.white70,
+                                      ),
                                     ),
+                                    const Spacer(),
                                     Container(
                                       padding: EdgeInsets.symmetric(
-                                        horizontal: 14.w,
+                                        horizontal: 12.w,
                                         vertical: 6.h,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.secondary,
+                                        color: Colors.white24,
                                         borderRadius:
-                                            BorderRadius.circular(20.r),
+                                            BorderRadius.circular(30.r),
                                       ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'Read More',
-                                            style: AppTextStyles.titleSmall
-                                                .copyWith(
-                                              fontSize: 14.sp,
-                                            ),
-                                          ),
-                                          SizedBox(width: 4.w),
-                                          const Icon(
-                                            Icons.arrow_forward_ios_rounded,
-                                            size: 12,
-                                            color: AppColors.white,
-                                          ),
-                                        ],
+                                      child: Text(
+                                        'Read More',
+                                        style: AppTextStyles.bodySmall.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -261,33 +246,12 @@ class HeadlinesCarousel extends StatelessWidget {
                             ),
                           ),
                         ),
-
-                        // Page indicator
-                        Positioned(
-                          top: 20.h,
-                          right: 20.w,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 10.w,
-                              vertical: 5.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(20.r),
-                            ),
-                            child: Text(
-                              '${index + 1}/${articles.length}',
-                              style: AppTextStyles.titleSmall.copyWith(
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
                 ),
-              ),
+              ).animate().fadeIn(
+                  duration: 300.ms, delay: Duration(milliseconds: index * 100)),
             );
           },
         );
@@ -295,27 +259,176 @@ class HeadlinesCarousel extends StatelessWidget {
     );
   }
 
-  Widget _buildHeadlinesShimmer() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.w),
-      child: Shimmer.fromColors(
-        baseColor: AppColors.shimmerBaseColor,
-        highlightColor: AppColors.shimmerHighlightColor,
-        child: Container(
-          height: 0.35.sh,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-        ),
+  Widget _buildHeadlinesShimmer(BuildContext context) {
+    // Use the same height as actual content (35% of screen height)
+    return SizedBox(
+      height: 0.35.sh,
+      child: PageView.builder(
+        itemCount: 3,
+        controller: PageController(viewportFraction: 0.9),
+        padEnds: true,
+        physics: const BouncingScrollPhysics(),
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: EdgeInsets.all(8.w),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppThemeColors.shadowColor(context),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.r),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Background image shimmer
+                    _buildImageShimmer(context),
+
+                    // Gradient overlay (same as real card)
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.2),
+                            Colors.black.withOpacity(0.6),
+                            Colors.black.withOpacity(0.9),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Content placeholders
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Padding(
+                        padding: EdgeInsets.all(20.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Category/Source tag placeholder
+                            Shimmer.fromColors(
+                              baseColor:
+                                  AppThemeColors.shimmerBaseColor(context),
+                              highlightColor:
+                                  AppThemeColors.shimmerHighlightColor(context),
+                              child: Container(
+                                width: 100.w,
+                                height: 28.h,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(30.r),
+                                ),
+                              ),
+                            ),
+
+                            SizedBox(height: 12.h),
+
+                            // Title placeholders
+                            Shimmer.fromColors(
+                              baseColor:
+                                  AppThemeColors.shimmerBaseColor(context),
+                              highlightColor:
+                                  AppThemeColors.shimmerHighlightColor(context),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: double.infinity,
+                                    height: 20.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6.r),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  Container(
+                                    width: double.infinity,
+                                    height: 20.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6.r),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  Container(
+                                    width: 200.w,
+                                    height: 20.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6.r),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            SizedBox(height: 12.h),
+
+                            // Date and Read More button placeholders
+                            Row(
+                              children: [
+                                Shimmer.fromColors(
+                                  baseColor:
+                                      AppThemeColors.shimmerBaseColor(context),
+                                  highlightColor:
+                                      AppThemeColors.shimmerHighlightColor(
+                                          context),
+                                  child: Container(
+                                    width: 100.w,
+                                    height: 14.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(4.r),
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                Shimmer.fromColors(
+                                  baseColor:
+                                      AppThemeColors.shimmerBaseColor(context),
+                                  highlightColor:
+                                      AppThemeColors.shimmerHighlightColor(
+                                          context),
+                                  child: Container(
+                                    width: 80.w,
+                                    height: 28.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(30.r),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildImageShimmer() {
+  Widget _buildImageShimmer(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBaseColor,
-      highlightColor: AppColors.shimmerHighlightColor,
+      baseColor: AppThemeColors.shimmerBaseColor(context),
+      highlightColor: AppThemeColors.shimmerHighlightColor(context),
       child: Container(
         color: Colors.white,
       ),
